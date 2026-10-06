@@ -663,7 +663,13 @@ details.more summary { cursor: pointer; color: var(--teal); font-weight: 500; }
 }
 @media (max-width: 900px) {
   .line.line-head, .rline.line-head { display: none; }
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); transition: transform .2s; }
+  /* มือถือ: ยึดกับขอบบน-ล่างของหน้าจอจริง (ไม่ใช้ 100vh ซึ่งรวมพื้นที่ที่แถบเครื่องมือเบราว์เซอร์บังอยู่)
+     เมนูเลื่อนได้ภายใน และส่วนชื่อผู้ใช้/ออกจากระบบตรึงไว้ท้ายเสมอ */
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: auto; max-height: 100dvh;
+    transform: translateX(-100%); transition: transform .2s; overscroll-behavior: contain; }
+  .sidebar .nav { min-height: 0; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .side-user { padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); flex: none; }
+  .side-brand { padding-top: calc(20px + env(safe-area-inset-top, 0px)); flex: none; }
   .app.nav-open .sidebar { transform: none; }
   .app.nav-open .scrim { display: block; position: fixed; inset: 0; background: rgba(11,76,83,.4); z-index: 20; }
   .hamburger { display: block; }
@@ -1026,7 +1032,7 @@ details.more summary { cursor: pointer; color: var(--teal); font-weight: 500; }
  * ===================================================================== */
 
 /* ---------------- STATE / CONSTANTS ---------------- */
-const APP_VERSION = '2026-10-06.3';
+const APP_VERSION = '2026-10-06.4';
 const TZ = 'Asia/Bangkok';
 const MAX_IMG = 5;
 const S = {
