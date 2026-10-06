@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>MolaMola Care</title>
@@ -11,8 +12,6 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <base target="_top">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Mitr:wght@400;500;600&display=swap" rel="stylesheet">
@@ -856,6 +855,7 @@ details.more summary { cursor: pointer; color: var(--teal); font-weight: 500; }
     };
     window.addEventListener('error', function (e) {
       var m = (e && e.message) || 'error';
+      if (m === 'Script error.' || m === 'Script error') return;   // สคริปต์ภายนอก ไม่ใช่ของแอป
       if (e && e.filename) m += ' (' + e.filename + ':' + (e.lineno || '?') + ')';
       window.__molaErrors.push(m);
     });
@@ -1026,7 +1026,7 @@ details.more summary { cursor: pointer; color: var(--teal); font-weight: 500; }
  * ===================================================================== */
 
 /* ---------------- STATE / CONSTANTS ---------------- */
-const APP_VERSION = '2026-10-06.2';
+const APP_VERSION = '2026-10-06.3';
 const TZ = 'Asia/Bangkok';
 const MAX_IMG = 5;
 const S = {
@@ -1571,10 +1571,22 @@ function clearLoginError() {
   const box = $('#loginError');
   if (box) box.hidden = true;
 }
+// แสดงเฉพาะข้อผิดพลาดจากโค้ดของแอปเอง — ข้าม "Script error." ที่มาจากสคริปต์ภายนอก
+// (เช่น เมนูแชร์ของ Safari, ส่วนขยายเบราว์เซอร์, ตัวแปลภาษา) ซึ่งไม่กระทบการทำงานของแอป
+function ownError(e) {
+  const msg = String((e && e.message) || '');
+  if (!msg || msg === 'Script error.' || msg === 'Script error') return false;
+  const f = String((e && e.filename) || '');
+  return !f || f.split('#')[0].split('?')[0] === location.href.split('#')[0].split('?')[0];
+}
 window.addEventListener('error', e => {
+  if (!ownError(e)) return;
+  // ถ้ารายชื่อโหลดแล้ว แปลว่าแอปทำงานได้ ไม่ต้องขึ้นกล่องแดงกลางหน้า
+  const sel = $('#loginUser');
+  if (sel && sel.options.length > 1) { console.warn('ข้อผิดพลาดในหน้าเว็บ:', e.message); return; }
   if ($('#login') && !$('#login').hidden) {
     loginError('เกิดข้อผิดพลาดในหน้าเว็บ: ' + (e.message || 'ไม่ทราบสาเหตุ') +
-      ' — ตรวจว่าได้คัดลอกไฟล์ Index / Css / Js ครบและ Deploy เวอร์ชันใหม่แล้ว', true);
+      ' — ตรวจว่าได้อัปเดตไฟล์ครบและ Deploy เวอร์ชันใหม่แล้ว', true);
   }
 });
 
